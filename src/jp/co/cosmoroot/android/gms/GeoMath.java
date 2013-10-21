@@ -9,12 +9,15 @@ import jp.co.cosmoroot.android.gms.maps.model.LatLonBounds;
 
 
 import android.graphics.Point;
+import android.location.Location;
 
 import com.amay077.android.collections.Lambda;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.LinearRing;
 
 public class GeoMath {
 
@@ -61,17 +64,24 @@ public class GeoMath {
 	public static double distance(Point A, Point B) {
 		return Math.sqrt(Math.pow(B.x - A.x, 2d) + Math.pow(B.y - A.y ,2d));
 	}
+	
+	public static double distanceAsGeodesic(LatLon a, LatLon b) {
+		float[] results = new float[2];
+		Location.distanceBetween(a.lat, a.lon, b.lat, b.lon, results);
+		
+		return results[0];
+	}
 
 	public static LatLonBounds getBounds(List<LatLon> ring) {
 		GeometryFactory gf = new GeometryFactory();
 		
 		Coordinate[] coords = new Coordinate[ring.size()];
 		for (int i = 0; i < coords.length; i++) {
-			coords[i] = new Coordinate(ring.get(i).lat, ring.get(i).lon);
+			coords[i] = new Coordinate(ring.get(i).lon, ring.get(i).lat);
 		}
 		
-		com.vividsolutions.jts.geom.Polygon poly = gf.createPolygon(gf.createLinearRing(coords), null);
-		Envelope env = poly.getEnvelopeInternal();
+		LineString lineString = gf.createLineString(coords);
+		Envelope env = lineString.getEnvelopeInternal();
 		return new LatLonBounds(env.getMaxY(), env.getMinX(), env.getMinY(), env.getMaxX());
 	}
 
@@ -99,6 +109,10 @@ public class GeoMath {
 		}
 		
 		return gf.createPolygon(gf.createLinearRing(coords), null);
+	}
+	
+	public static LatLon toLatLon(Location l) {
+		return new LatLon(l.getLatitude(), l.getLongitude());
 	}
 
 }
