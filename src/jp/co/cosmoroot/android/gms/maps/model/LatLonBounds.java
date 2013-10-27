@@ -38,4 +38,8 @@ public class LatLonBounds {
 		
 		return new LatLonBounds(north + halfLat, west - halfLon, south - halfLat, east + halfLon);
 	}
+	
+	public LatLon getCenter() {
+		return new LatLon(south + ((north - south) / 2d), west + ((east - west) / 2d));
+	}
 }
